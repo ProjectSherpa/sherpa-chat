@@ -9,7 +9,7 @@ export default class NavBar extends React.Component {
   render() {
     return (
       <AppBar
-        title="Title"
+        title="Sherpa Song Fetcher"
         iconClassNameRight="muidocs-icon-navigation-expand-more"
       />
     );
