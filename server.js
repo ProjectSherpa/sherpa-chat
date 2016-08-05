@@ -1,8 +1,28 @@
-var express = require('express');
+//////////////////////////////////////////////////////////////////////////////
+// set up 
+//////////////////////////////////////////////////////////////////////////////
+
+var express  = require('express');
+var app      = express();                              
+var mongoose = require('mongoose');                   
+var morgan = require('morgan');        // log requests to the console
+var bodyParser = require('body-parser');    // pull information from HTML POST
+// var methodOverride = require('method-override');
+
 var webpackDevMiddleware = require('webpack-dev-middleware');
 var webpack = require('webpack');
 var webpackConfig = require('./webpack.config.js');
-var app = express();
+ 
+var compiler = webpack(webpackConfig);
+
+// MongoDB via mlab
+mongoose.connect('mongodb://localhost/test');
+var conn = mongoose.connection;              
+ 
+conn.once('open', function() {
+  console.log("connected to mongodb://localhost/test");
+  // Wait for the database connection to establish, then start the app.                         
+});
  
 var compiler = webpack(webpackConfig);
  
