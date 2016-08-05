@@ -2,6 +2,8 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import NavBar from './NavBar';
+import StatsContainer from './StatsContainer';
+
 import injectTapEventPlugin from 'react-tap-event-plugin';
 
 // Needed for onTouchTap
@@ -10,7 +12,10 @@ injectTapEventPlugin();
  
 const App = () => (
   <MuiThemeProvider>
-    <NavBar />
+    <div>
+      <NavBar />
+      <StatsContainer />
+    </div>
   </MuiThemeProvider>
 );
 

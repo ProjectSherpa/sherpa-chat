@@ -38,6 +38,11 @@ app.use(webpackDevMiddleware(compiler, {
   },
   historyApiFallback: true,
 }));
+
+// Front end routes, catch all for now
+app.get('*', function(req, res) {
+  res.sendfile('./www/index.html');
+});
  
 var server = app.listen(5000, function() {
   var port = server.address().port;
