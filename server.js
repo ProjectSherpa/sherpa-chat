@@ -12,7 +12,7 @@ var bodyParser = require('body-parser');    // pull information from HTML POST
 var webpackDevMiddleware = require('webpack-dev-middleware');
 var webpack = require('webpack');
 var webpackConfig = require('./webpack.config.js');
- 
+var path    = require('path');
 var compiler = webpack(webpackConfig);
 
 // MongoDB via mlab
@@ -26,7 +26,10 @@ conn.once('open', function() {
  
 var compiler = webpack(webpackConfig);
  
-app.use(express.static(__dirname + '/www'));
+//app.use(express.static(__dirname + '/www'));
+
+app.use(express.static(path.resolve(__dirname + './')))
+
 
 // boilerplate from webpacDevMiddleware repo 
 app.use(webpackDevMiddleware(compiler, {
@@ -40,9 +43,20 @@ app.use(webpackDevMiddleware(compiler, {
 }));
 
 // Front end routes, catch all for now
-app.get('*', function(req, res) {
-  res.sendfile('./www/index.html');
+app.get('/', function(req, res) {
+
+// Front end routes, catch all for now
+res.sendFile(path.resolve(__dirname + '/www/index.html'))
+
+  //res.sendfile('./www/index.html');
 });
+
+// Front end routes, catch all for now
+app.get('/dashboard', function(req, res) {
+  res.redirect('http://localhost:4242')
+  //res.sendfile('/linux-dash/app/index.html');
+});
+
  
 var server = app.listen(5000, function() {
   var port = server.address().port;
