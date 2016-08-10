@@ -1,50 +1,89 @@
-//////////////////////////////////////////////////////////////////////////////
-// set up 
-//////////////////////////////////////////////////////////////////////////////
+const express = require('express');
+const app = express();
+const Sequelize = require('sequelize');
+const mysql = require('mysql');
 
-var express  = require('express');
-var app      = express();                              
-var mongoose = require('mongoose');                   
-var morgan = require('morgan');        // log requests to the console
-var bodyParser = require('body-parser');    // pull information from HTML POST
-// var methodOverride = require('method-override');
-
-var webpackDevMiddleware = require('webpack-dev-middleware');
-var webpack = require('webpack');
-var webpackConfig = require('./webpack.config.js');
- 
-var compiler = webpack(webpackConfig);
-
-// MongoDB via mlab
-mongoose.connect('mongodb://localhost/test');
-var conn = mongoose.connection;              
- 
-conn.once('open', function() {
-  console.log("connected to mongodb://localhost/test");
-  // Wait for the database connection to establish, then start the app.                         
+// Database setup
+var connection = mysql.createConnection({
+  host: 'localhost',
+  user: 'root',
+  password: '',
+  database: 'sstest'
 });
- 
-var compiler = webpack(webpackConfig);
- 
-app.use(express.static(__dirname + '/www'));
 
-// boilerplate from webpacDevMiddleware repo 
-app.use(webpackDevMiddleware(compiler, {
-  hot: true,
-  filename: 'bundle.js',
-  publicPath: '/',
-  stats: {
-    colors: true,
-  },
-  historyApiFallback: true,
-}));
+connection.connect();
 
-// Front end routes, catch all for now
-app.get('*', function(req, res) {
-  res.sendfile('./www/index.html');
+var db = new Sequelize('sstest', 'root', '', {
+  host: 'localhost',
+  dialect: 'mysql',
 });
- 
-var server = app.listen(5000, function() {
-  var port = server.address().port;
-  console.log('Example app listening at port: ', port);
+
+var Video = db.define('video', {
+  uniqueId: Sequelize.STRING
+});
+
+var VideoLocation = db.define('videolocation', {
+  path: Sequelize.STRING
+});
+
+var Metadata = db.define('metadata', {
+  name: Sequelize.STRING
+});
+
+// Video.hasOne(Metadata);
+Metadata.belongsTo(Video);
+
+// Video.hasOne(VideoLocation);
+VideoLocation.belongsTo(Video);
+
+db.authenticate()
+  .then(function(err) {
+    console.log('Connection has been successfully handled');
+  })
+  .catch(function(err) {
+    console.log('Unable to connec to the database', err);
+  })
+
+Video.sync().then(function() {
+  Metadata.sync().then(function() {
+    VideoLocation.sync().then(function() {
+      return Video.create({
+        uniqueId: '879dj31lkj'
+      })
+      .then(function(video) {
+        Metadata.create({
+          name: 'HR Video Part 2',
+          videoId: video.id
+        })
+        .then(function(metadata) {
+          VideoLocation.create({
+            path: 'videos/filename2.mov',
+            videoId: video.id
+          });
+          console.log('sucessfully created metatadata')
+        })
+      })
+    });
+  });
+});
+
+// Routing
+app.use(express.static('public'));
+
+app.get('/video', function(req, res) {
+  var videoName = 'HR Video Part 2'
+  Metadata.findAll({where: {
+    name: videoName
+  }}).then(function(metadata) {
+      VideoLocation.findOne({where: {
+        videoId: metadata[0].videoId
+      }}).then(function(location) {
+        res.redirect('/' + location.path);
+      })
+    })
+});
+
+// Start server
+app.listen(5000, function() {
+  console.log('Listening on port 3000');
 });
